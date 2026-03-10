@@ -1,0 +1,47 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: switchpay_app
+    volumes:
+      - .:/var/www
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: switchpay_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: switchpay_db
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  db_data:
