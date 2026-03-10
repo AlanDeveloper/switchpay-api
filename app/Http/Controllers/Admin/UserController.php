@@ -53,7 +53,8 @@ class UserController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
-        User::where("id", $id)->delete();
+        $user = User::findOrFail($id);
+        $user->delete();
 
         return response()->json(null, 204);
     }

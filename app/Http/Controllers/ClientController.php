@@ -48,7 +48,8 @@ class ClientController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
-        Client::where("id", $id)->delete();
+        $client = Client::findOrFail($id);
+        $client->delete();
 
         return response()->json(null, 204);
     }
