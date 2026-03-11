@@ -13,7 +13,13 @@ class Transaction extends Model
      *
      * @var list<string>
      */
-    protected $fillable = ["client_id", "amount"];
+    protected $fillable = [
+        "client_id",
+        "amount",
+        "gateway_id",
+        "card_last_numbers",
+        "external_id",
+    ];
 
     protected $casts = [
         "amount" => "decimal:2",
@@ -22,6 +28,11 @@ class Transaction extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function gateway(): BelongsTo
+    {
+        return $this->belongsTo(Gateway::class);
     }
 
     public function products(): BelongsToMany

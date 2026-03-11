@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'gateways' => [
+        'gateway_1' => [
+            'url' => env('GATEWAY1_API_URL'),
+            'token' => env('GATEWAY1_API_TOKEN'),
+            'email' => env('GATEWAY1_API_EMAIL')
+        ],
+
+        'gateway_2' => [
+            'url' => env('GATEWAY2_API_URL'),
+            'token' => env('GATEWAY2_API_TOKEN'),
+            'secret' => env('GATEWAY2_API_SECRET')
+        ],
+    ]
 ];
