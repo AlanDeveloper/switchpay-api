@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\GatewayController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,10 @@ Route::middleware("auth:sanctum")->group(function () {
 
     Route::post("/logout", [AuthController::class, "logout"]);
 });
+
+Route::get("/gateway", [GatewayController::class, "index"]);
+Route::get("/gateway/{id}", [GatewayController::class, "show"]);
+Route::patch("/gateway/{id}", [GatewayController::class, "update"]);
 
 Route::get("/transaction", [TransactionController::class, "index"]);
 Route::get("/transaction/{id}", [TransactionController::class, "show"]);
