@@ -22,6 +22,7 @@ Route::middleware("auth:sanctum")->group(function () {
 Route::get("/gateway", [GatewayController::class, "index"]);
 Route::get("/gateway/{id}", [GatewayController::class, "show"]);
 Route::patch("/gateway/{id}", [GatewayController::class, "update"]);
+Route::get("/gateway/{id}/logs", [GatewayController::class, "get_logs"]);
 
 Route::get("/transaction", [TransactionController::class, "index"]);
 Route::get("/transaction/{id}", [TransactionController::class, "show"]);

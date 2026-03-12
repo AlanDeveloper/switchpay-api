@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateGatewayRequest;
 use App\Models\Gateway;
+use App\Models\GatewayLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -32,5 +33,14 @@ class GatewayController extends Controller
         Gateway::where("id", $id)->update($request->validated());
 
         return response()->json(null, 204);
+    }
+
+    public function get_logs(int $id): JsonResponse
+    {
+        $logs = GatewayLog::where("gateway_id", $id)->paginate(
+            $request->per_page ?? 15,
+        );
+
+        return response()->json($logs);
     }
 }
