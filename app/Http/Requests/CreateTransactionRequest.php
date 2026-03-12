@@ -26,8 +26,8 @@ class CreateTransactionRequest extends FormRequest
         return [
             "client_id" => "required|integer",
             "products" => "required|array",
-            "products.*.id" => "required|integer",
-            "products.*.quantity" => "required|integer",
+            "products.*.id" => "required|integer|exists:products,id",
+            "products.*.quantity" => "required|integer|min:1",
             "card_number" => "required|string",
             "cvv" => "required|max:3",
         ];

@@ -71,10 +71,12 @@ class TransactionController extends Controller
                 "transaction_id" => $transaction->id,
             ]);
 
-            $dbProducts[$item["id"]]->decrement(
-                "available_amount",
-                $item["quantity"],
-            );
+            if ($result["status"]) {
+                $dbProducts[$item["id"]]->decrement(
+                    "available_amount",
+                    $item["quantity"],
+                );
+            }
         }
 
         return response()->json(
