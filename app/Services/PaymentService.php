@@ -14,7 +14,7 @@ class PaymentService
         $gatewayId = null;
         $successfull = false;
         $result = ['id' => null];
-        $gateways = GatewayM::where("active", true)
+        $gateways = GatewayM::where("is_active", true)
             ->orderBy("priority", "desc")
             ->get();
 
@@ -24,7 +24,7 @@ class PaymentService
             if (!$gateway) {
                 GatewayLog::create([
                     "status" => false,
-                    "message" => "Invalid gateway: " . $gatewayModel->key,
+                    "message" => "Invalid gateway: " . $gatewayModel->name,
                 ]);
                 continue;
             }
@@ -38,7 +38,7 @@ class PaymentService
                     "gateway_id" => $gatewayModel->id,
                     "message" =>
                         "Error processing payment by " .
-                        $gateway->value .
+                        $gatewayModel->name .
                         ": " .
                         $e->getMessage(),
                 ]);
@@ -50,7 +50,7 @@ class PaymentService
                     "status" => false,
                     "gateway_id" => $gatewayModel->id,
                     "message" =>
-                        "Error processing payment by " . $gateway->value,
+                        "Error processing payment by " . $gatewayModel->name,
                 ]);
                 continue;
             }
@@ -59,7 +59,7 @@ class PaymentService
                 "status" => true,
                 "gateway_id" => $gatewayModel->id,
                 "message" =>
-                    "Successful processing payment by " . $gateway->value,
+                    "Successful processing payment by " . $gatewayModel->name,
             ]);
 
             $successfull = true;
