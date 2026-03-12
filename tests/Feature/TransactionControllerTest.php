@@ -137,6 +137,51 @@ class TransactionControllerTest extends TestCase
         ]);
     }
 
+    public function test_it_cannot_create_transaction_successfully_without_gateways(): void
+    {
+        $client = Client::factory()->create(["name" => "John Doe"]);
+        $product = Product::factory()->create([
+            "price" => 100,
+            "available_amount" => 10,
+        ]);
+
+        $this->mock(PaymentService::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive("execute")
+                ->once()
+                ->andReturn([
+                    "gateway_id" => null,
+                    "external_id" => null,
+                    "status" => false,
+                ]);
+        });
+
+        $payload = [
+            "client_id" => $client->id,
+            "card_number" => "1234567812341234",
+            "cvv" => "123",
+            "products" => [["id" => $product->id, "quantity" => 2]],
+        ];
+
+        $response = $this->post("/api/transaction", $payload);
+
+        $response
+            ->assertStatus(201)
+            ->assertJsonPath("amount", "200.00")
+            ->assertJsonPath("status", false);
+
+        $this->assertDatabaseHas("transactions", [
+            "client_id" => $client->id,
+            "amount" => 200,
+            "external_id" => null,
+        ]);
+
+        $this->assertDatabaseHas("products", [
+            "id" => $product->id,
+            "available_amount" => 10,
+        ]);
+    }
+
     public function test_it_fails_when_product_does_not_exist(): void
     {
         $client = Client::factory()->create();

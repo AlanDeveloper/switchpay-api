@@ -13,6 +13,7 @@ class PaymentService
     {
         $gatewayId = null;
         $successfull = false;
+        $result = ['id' => null];
         $gateways = GatewayM::where("active", true)
             ->orderBy("priority", "desc")
             ->get();
