@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Mail\NewUserMail;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Mail;
 
 class UserController extends Controller
 {
@@ -33,13 +36,13 @@ class UserController extends Controller
 
     public function store(CreateUserRequest $request): JsonResponse
     {
-        $password = "teste";
+        $tempPassword = "teste";
         $user = User::create([
             ...$request->validated(),
-            "password" => $password,
+            "password" => Hash::make($tempPassword),
         ]);
 
-        //send password by email
+        Mail::to($user->email)->send(new NewUserMail($user, $tempPassword));
 
         return response()->json($user, 201);
     }
