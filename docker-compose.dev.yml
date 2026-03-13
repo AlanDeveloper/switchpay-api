@@ -32,6 +32,7 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      TZ: America/Sao_Paulo
     volumes:
       - db_data:/var/lib/mysql
     ports:
@@ -42,6 +43,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+
+  gateway_mock:
+    image: matheusprotzen/gateways-mock
+    container_name: switchpay_gateways
+    ports:
+      - "3001:3001"
+      - "3002:3002"
 
 volumes:
   db_data:
