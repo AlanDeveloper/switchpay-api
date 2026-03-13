@@ -15,7 +15,7 @@ API RESTful de gerenciamento de pagamentos multi-gateway desenvolvida com Larave
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/seu-usuario/switchpay.git
+git clone git@github.com:AlanDeveloper/switchpay-api.git
 cd switchpay
 
 # 2. Copie o arquivo de ambiente
