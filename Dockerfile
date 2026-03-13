@@ -27,6 +27,11 @@ RUN composer install --optimize-autoloader --no-scripts
 COPY . .
 RUN composer run-script post-autoload-dump
 
+RUN chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
+
 EXPOSE 9000
 
-CMD ["php-fpm"]
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
