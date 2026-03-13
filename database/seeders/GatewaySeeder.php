@@ -28,12 +28,14 @@ class GatewaySeeder extends Seeder
             ],
         ];
         foreach ($list as $item) {
-            Gateway::create([
-                "key" => $item["key"],
-                "name" => $item["name"],
-                "is_active" => $item["is_active"],
-                "priority" => $item["priority"],
-            ]);
+            Gateway::firstOrCreate(
+                ["key" => $item["key"]],
+                [
+                    "name"      => $item["name"],
+                    "is_active" => $item["is_active"],
+                    "priority"  => $item["priority"],
+                ]
+            );
         }
     }
 }
