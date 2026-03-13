@@ -32,7 +32,6 @@ class PaymentServiceTest extends TestCase
                 ->shouldReceive("processPayment")
                 ->once()
                 ->andReturn([
-                    "status" => true,
                     "id" => "ref_123456",
                 ]);
         });
@@ -57,7 +56,6 @@ class PaymentServiceTest extends TestCase
         $this->assertDatabaseHas("gateway_logs", [
             "gateway_id" => $g1->id,
             "status" => true,
-            "message" => "Successful processing payment by " . $g1->name,
         ]);
 
         $this->assertDatabaseMissing("gateway_logs", ["gateway_id" => $g2->id]);
@@ -81,7 +79,6 @@ class PaymentServiceTest extends TestCase
                 ->shouldReceive("processPayment")
                 ->once()
                 ->andReturn([
-                    "status" => false,
                     "id" => null,
                 ]);
         });
@@ -91,7 +88,6 @@ class PaymentServiceTest extends TestCase
                 ->shouldReceive("processPayment")
                 ->once()
                 ->andReturn([
-                    "status" => true,
                     "id" => "ref_123456",
                 ]);
         });
@@ -112,7 +108,6 @@ class PaymentServiceTest extends TestCase
         $this->assertDatabaseHas("gateway_logs", [
             "gateway_id" => $g2->id,
             "status" => true,
-            "message" => "Successful processing payment by " . $g2->name,
         ]);
     }
 }

@@ -3,13 +3,28 @@
 namespace Tests\Feature;
 
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ClientControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    private User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Role::create(["name" => "admin"]);
+        Role::create(["name" => "user"]);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole("admin");
+        $this->actingAs($this->admin);
+    }
 
     public function test_it_can_list_clients(): void
     {

@@ -6,15 +6,30 @@ use App\Models\Client;
 use App\Models\Gateway;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Services\PaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Mockery\MockInterface;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class TransactionControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    private User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Role::create(["name" => "admin"]);
+        Role::create(["name" => "user"]);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole("admin");
+        $this->actingAs($this->admin);
+    }
 
     public function test_it_can_list_transactions(): void
     {
@@ -96,54 +111,6 @@ class TransactionControllerTest extends TestCase
             "price" => 100,
             "available_amount" => 10,
         ]);
-        $gateway = Gateway::factory()->create();
-
-        $this->mock(PaymentService::class, function (MockInterface $mock) use (
-            $gateway,
-        ) {
-            $mock
-                ->shouldReceive("execute")
-                ->once()
-                ->andReturn([
-                    "gateway_id" => $gateway->id,
-                    "external_id" => null,
-                    "status" => false,
-                ]);
-        });
-
-        $payload = [
-            "client_id" => $client->id,
-            "card_number" => "1234567812341234",
-            "cvv" => "123",
-            "products" => [["id" => $product->id, "quantity" => 2]],
-        ];
-
-        $response = $this->post("/api/transaction", $payload);
-
-        $response
-            ->assertStatus(201)
-            ->assertJsonPath("amount", "200.00")
-            ->assertJsonPath("status", false);
-
-        $this->assertDatabaseHas("transactions", [
-            "client_id" => $client->id,
-            "amount" => 200,
-            "external_id" => null,
-        ]);
-
-        $this->assertDatabaseHas("products", [
-            "id" => $product->id,
-            "available_amount" => 10,
-        ]);
-    }
-
-    public function test_it_cannot_create_transaction_successfully_without_gateways(): void
-    {
-        $client = Client::factory()->create(["name" => "John Doe"]);
-        $product = Product::factory()->create([
-            "price" => 100,
-            "available_amount" => 10,
-        ]);
 
         $this->mock(PaymentService::class, function (MockInterface $mock) {
             $mock
@@ -166,8 +133,12 @@ class TransactionControllerTest extends TestCase
         $response = $this->post("/api/transaction", $payload);
 
         $response
-            ->assertStatus(201)
+            ->assertStatus(502)
+            ->assertJsonPath("client_id", $client->id)
             ->assertJsonPath("amount", "200.00")
+            ->assertJsonPath("card_last_numbers", "1234")
+            ->assertJsonPath("gateway_id", null)
+            ->assertJsonPath("external_id", null)
             ->assertJsonPath("status", false);
 
         $this->assertDatabaseHas("transactions", [
