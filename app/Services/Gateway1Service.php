@@ -39,7 +39,7 @@ class Gateway1Service
             ->post(
                 config("services.gateways.gateway_1.url") . "/transactions",
                 [
-                    "amount" => (int) $data["amount"],
+                    "amount" => (int) round($data["amount"] * 100),
                     "name" => $data["name"],
                     "email" => $data["email"],
                     "cardNumber" => $data["card_number"],
