@@ -17,24 +17,24 @@ use Password;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): JsonResponse
-    {
-        $user = User::create([
-            "name" => $request->name,
-            "email" => $request->email,
-            "password" => Hash::make($request->password),
-        ]);
+    // public function register(RegisterRequest $request): JsonResponse
+    // {
+    //     $user = User::create([
+    //         "name" => $request->name,
+    //         "email" => $request->email,
+    //         "password" => Hash::make($request->password),
+    //     ]);
 
-        $token = $user->createToken("api")->plainTextToken;
+    //     $token = $user->createToken("api")->plainTextToken;
 
-        return response()->json(
-            [
-                "user" => $user,
-                "token" => $token,
-            ],
-            201,
-        );
-    }
+    //     return response()->json(
+    //         [
+    //             "user" => $user,
+    //             "token" => $token,
+    //         ],
+    //         201,
+    //     );
+    // }
 
     public function login(LoginRequest $request): JsonResponse
     {

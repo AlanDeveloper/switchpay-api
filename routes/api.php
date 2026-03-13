@@ -8,7 +8,7 @@ use App\Http\Controllers\GatewayController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
-Route::post("/register", [AuthController::class, "register"]);
+// Route::post("/register", [AuthController::class, "register"]);
 Route::post("/login", [AuthController::class, "login"]);
 Route::post("/forgotPassword", [AuthController::class, "forgotPassword"]);
 Route::post("/resetPassword", [AuthController::class, "resetPassword"]);
