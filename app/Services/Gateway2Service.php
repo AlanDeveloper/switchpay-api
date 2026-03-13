@@ -19,19 +19,43 @@ class Gateway2Service
                     "services.gateways.gateway_2.secret",
                 ),
             ])
+            ->post(config("services.gateways.gateway_2.url") . "/transacoes", [
+                "valor" => (int) $data["amount"],
+                "nome" => $data["name"],
+                "email" => $data["email"],
+                "numeroCartao" => $data["card_number"],
+                "cvv" => $data["cvv"],
+            ]);
+
+        return [
+            "id" => $response->json("id"),
+            "response" => $response->json(),
+        ];
+    }
+
+    public function refundPayment(string $id): array
+    {
+        $response = Http::timeout(30)
+            ->withHeaders([
+                "Accept" => "application/json",
+                "Content-Type" => "application/json",
+                "Gateway-Auth-Token" => config(
+                    "services.gateways.gateway_2.token",
+                ),
+                "Gateway-Auth-Secret" => config(
+                    "services.gateways.gateway_2.secret",
+                ),
+            ])
             ->post(
-                config("services.gateways.gateway_2.url") . "/transacoes",
+                config("services.gateways.gateway_2.url") .
+                    "/transacoes/reembolso",
                 [
-                    "valor" => (int) $data["amount"],
-                    "nome" => $data["name"],
-                    "email" => $data["email"],
-                    "numeroCartao" => $data["card_number"],
-                    "cvv" => $data["cvv"]
+                    "id" => $id,
                 ],
             );
 
         return [
-            "id" => $response->json("id"),
+            "status" => $response->status() === 201,
             "response" => $response->json(),
         ];
     }

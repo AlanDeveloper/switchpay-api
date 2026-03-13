@@ -185,4 +185,67 @@ class TransactionControllerTest extends TestCase
 
         $response->assertStatus(422);
     }
+
+    public function test_it_can_refund_transaction(): void
+    {
+        $transaction = Transaction::factory()->create([
+            "external_id" => "ref_123456",
+            "status" => true,
+        ]);
+
+        $this->mock(PaymentService::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive("charge_back")
+                ->once()
+                ->andReturn([
+                    "status" => true,
+                ]);
+        });
+
+        $response = $this->post(
+            "/api/transaction/" . $transaction->id . "/refund",
+        );
+
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas("refunds", [
+            "transaction_id" => $transaction->id,
+            "status" => true,
+        ]);
+    }
+
+    public function test_it_fails_to_refund_transaction(): void
+    {
+        $transaction = Transaction::factory()->create([
+            "external_id" => "ref_123456",
+            "status" => true,
+        ]);
+
+        $this->mock(PaymentService::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive("charge_back")
+                ->once()
+                ->andReturn([
+                    "status" => false,
+                ]);
+        });
+
+        $response = $this->post(
+            "/api/transaction/" . $transaction->id . "/refund",
+        );
+
+        $response->assertStatus(502);
+
+        $this->assertDatabaseHas("refunds", [
+            "transaction_id" => $transaction->id,
+            "status" => false,
+        ]);
+    }
+
+    public function test_it_cannot_refund_non_existing_transaction(): void
+    {
+        $response = $this->post("/api/transaction/9999/refund");
+
+        $response->assertStatus(404);
+    }
 }

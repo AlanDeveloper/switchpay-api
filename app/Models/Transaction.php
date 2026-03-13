@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
 {
@@ -37,6 +38,11 @@ class Transaction extends Model
     public function gateway(): BelongsTo
     {
         return $this->belongsTo(Gateway::class);
+    }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
     }
 
     public function products(): BelongsToMany

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateTransactionRequest;
 use App\Models\Client;
 use App\Models\Product;
+use App\Models\Refund;
 use App\Models\Transaction;
 use App\Models\TransactionProduct;
 use App\Services\PaymentService;
@@ -18,7 +19,12 @@ class TransactionController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $transactions = Transaction::with(["client", "products", "gateway"])
+        $transactions = Transaction::with([
+            "client",
+            "products",
+            "gateway",
+            "refunds",
+        ])
             ->when($request->client_id, function ($query) use ($request) {
                 $query->where("client_id", $request->client_id);
             })
@@ -33,6 +39,7 @@ class TransactionController extends Controller
             "client",
             "products",
             "gateway",
+            "refunds",
         ])->findOrFail($id);
 
         return response()->json($transaction);
@@ -83,6 +90,23 @@ class TransactionController extends Controller
 
         return response()->json(
             $transaction->load(["client", "products"]),
+            $result["status"] ? 201 : 502,
+        );
+    }
+
+    public function refund(int $id): JsonResponse
+    {
+        $transaction = Transaction::where("id", $id)->firstOrFail();
+
+        $result = $this->payment_service->charge_back($transaction);
+
+        Refund::create([
+            "status" => $result["status"],
+            "transaction_id" => $transaction->id,
+        ]);
+
+        return response()->json(
+            $transaction->load(["client", "products", "gateway", "refunds"]),
             $result["status"] ? 201 : 502,
         );
     }

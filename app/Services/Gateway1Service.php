@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Exception;
 use Http;
-use Illuminate\Support\Facades\Log;
 
 class Gateway1Service
 {
@@ -44,12 +43,35 @@ class Gateway1Service
                     "name" => $data["name"],
                     "email" => $data["email"],
                     "cardNumber" => $data["card_number"],
-                    "cvv" => $data["cvv"]
+                    "cvv" => $data["cvv"],
                 ],
             );
 
         return [
             "id" => $response->json("id"),
+            "response" => $response->json(),
+        ];
+    }
+
+    public function refundPayment(string $id): array
+    {
+        $token = $this->generateToken();
+
+        $response = Http::timeout(30)
+            ->withHeaders([
+                "Accept" => "application/json",
+                "Content-Type" => "application/json",
+            ])
+            ->withToken($token)
+            ->post(
+                config("services.gateways.gateway_1.url") .
+                    "/transactions/" .
+                    $id .
+                    "/charge_back",
+            );
+
+        return [
+            "status" => $response->status() === 201,
             "response" => $response->json(),
         ];
     }

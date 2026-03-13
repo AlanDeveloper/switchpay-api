@@ -2,6 +2,10 @@
 
 namespace Tests\Unit;
 
+use App\Models\Refund;
+use App\Models\Transaction;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 use App\Models\Gateway as GatewayM;
 use App\Services\PaymentService;
@@ -109,5 +113,119 @@ class PaymentServiceTest extends TestCase
             "gateway_id" => $g2->id,
             "status" => true,
         ]);
+    }
+
+    public function test_it_can_charge_back_successfully(): void
+    {
+        $g1 = GatewayM::factory()->create([
+            "key" => "gateway_1",
+            "is_active" => true,
+        ]);
+
+        $transaction = Transaction::factory()->create([
+            "external_id" => "ref_123456",
+            "gateway_id" => $g1->id,
+        ]);
+
+        $this->mock(Gateway1Service::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive("refundPayment")
+                ->once()
+                ->andReturn([
+                    "status" => true,
+                ]);
+        });
+
+        $service = new PaymentService();
+        $result = $service->charge_back($transaction);
+
+        $this->assertTrue($result["status"]);
+        $this->assertDatabaseHas("gateway_logs", [
+            "gateway_id" => $g1->id,
+            "status" => true,
+        ]);
+    }
+
+    public function test_it_fails_charge_back_when_gateway_refuses(): void
+    {
+        $g1 = GatewayM::factory()->create([
+            "key" => "gateway_1",
+            "is_active" => true,
+        ]);
+
+        $transaction = Transaction::factory()->create([
+            "external_id" => "ref_123456",
+            "gateway_id" => $g1->id,
+        ]);
+
+        $this->mock(Gateway1Service::class, function (MockInterface $mock) {
+            $mock
+                ->shouldReceive("refundPayment")
+                ->once()
+                ->andReturn([
+                    "status" => false,
+                    "response" => ["error" => "Refund refused"],
+                ]);
+        });
+
+        $service = new PaymentService();
+        $result = $service->charge_back($transaction);
+
+        $this->assertFalse($result["status"]);
+        $this->assertDatabaseHas("gateway_logs", [
+            "gateway_id" => $g1->id,
+            "status" => false,
+        ]);
+    }
+
+    public function test_it_throws_exception_when_transaction_has_no_external_id(): void
+    {
+        $transaction = Transaction::factory()->create([
+            "external_id" => null,
+        ]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage(
+            "Transaction has no external ID to refund.",
+        );
+
+        $service = new PaymentService();
+        $service->charge_back($transaction);
+    }
+
+    public function test_it_throws_exception_when_transaction_already_refunded(): void
+    {
+        $transaction = Transaction::factory()->create([
+            "external_id" => "ref_123456",
+        ]);
+
+        Refund::factory()->create([
+            "transaction_id" => $transaction->id,
+            "status" => true,
+        ]);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("Transaction has already been refunded.");
+
+        $service = new PaymentService();
+        $service->charge_back($transaction);
+    }
+
+    public function test_it_throws_exception_when_gateway_is_inactive(): void
+    {
+        $g1 = GatewayM::factory()->create([
+            "key" => "gateway_1",
+            "is_active" => false,
+        ]);
+
+        $transaction = Transaction::factory()->create([
+            "external_id" => "ref_123456",
+            "gateway_id" => $g1->id,
+        ]);
+
+        $this->expectException(ModelNotFoundException::class);
+
+        $service = new PaymentService();
+        $service->charge_back($transaction);
     }
 }

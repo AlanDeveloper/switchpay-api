@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\Gateway;
 use App\Models\Gateway as GatewayM;
 use App\Models\GatewayLog;
+use App\Models\Transaction;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -14,7 +15,7 @@ class PaymentService
     {
         $gatewayId = null;
         $successfull = false;
-        $result = ['id' => null];
+        $result = ["id" => null];
         $gateways = GatewayM::where("is_active", true)
             ->orderBy("priority", "desc")
             ->get();
@@ -65,7 +66,63 @@ class PaymentService
         return [
             "status" => $successfull,
             "external_id" => $result["id"],
-            "gateway_id" => $successfull ? $gatewayId : null
+            "gateway_id" => $successfull ? $gatewayId : null,
+        ];
+    }
+
+    public function charge_back(Transaction $transaction): array
+    {
+        if ($transaction->external_id === null) {
+            throw new Exception("Transaction has no external ID to refund.");
+        }
+
+        if ($transaction->refunds()->where("status", true)->exists()) {
+            throw new Exception("Transaction has already been refunded.");
+        }
+
+        $gateway = GatewayM::where("is_active", true)
+            ->where("id", $transaction->gateway_id)
+            ->firstOrFail();
+
+        $gatewayEnum = Gateway::tryFrom($gateway->key);
+
+        if (!$gatewayEnum) {
+            throw new Exception("Invalid gateway: " . $gateway->name);
+        }
+
+        try {
+            $result = app($gatewayEnum->class())->refundPayment(
+                $transaction->external_id,
+            );
+
+            if (!$result["status"]) {
+                throw new Exception(json_encode($result["response"]));
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            GatewayLog::create([
+                "status" => false,
+                "gateway_id" => $gateway->id,
+                "message" =>
+                    "Error processing payment by " .
+                    $gateway->name .
+                    ": " .
+                    $e->getMessage(),
+            ]);
+
+            return [
+                "status" => false,
+            ];
+        }
+
+        GatewayLog::create([
+            "status" => true,
+            "gateway_id" => $gateway->id,
+            "message" => "Successful refunding payment by " . $gateway->name,
+        ]);
+
+        return [
+            "status" => true,
         ];
     }
 }
