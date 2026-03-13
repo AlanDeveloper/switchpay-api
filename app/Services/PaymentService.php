@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Enums\Gateway;
-use App\Models\Gateway as GatewayM;
+use App\Models\Gateway as GatewayModel;
 use App\Models\GatewayLog;
 use App\Models\Transaction;
 use Exception;
@@ -14,9 +14,9 @@ class PaymentService
     public function execute(array $data): array
     {
         $gatewayId = null;
-        $successfull = false;
+        $successful = false;
         $result = ["id" => null];
-        $gateways = GatewayM::where("is_active", true)
+        $gateways = GatewayModel::where("is_active", true)
             ->orderBy("priority", "desc")
             ->get();
 
@@ -59,18 +59,18 @@ class PaymentService
                     "Successful processing payment by " . $gatewayModel->name,
             ]);
 
-            $successfull = true;
+            $successful = true;
             break;
         }
 
         return [
-            "status" => $successfull,
+            "status" => $successful,
             "external_id" => $result["id"],
-            "gateway_id" => $successfull ? $gatewayId : null,
+            "gateway_id" => $successful ? $gatewayId : null,
         ];
     }
 
-    public function charge_back(Transaction $transaction): array
+    public function chargeBack(Transaction $transaction): array
     {
         if ($transaction->external_id === null) {
             throw new Exception("Transaction has no external ID to refund.");
@@ -80,7 +80,7 @@ class PaymentService
             throw new Exception("Transaction has already been refunded.");
         }
 
-        $gateway = GatewayM::where("is_active", true)
+        $gateway = GatewayModel::where("is_active", true)
             ->where("id", $transaction->gateway_id)
             ->firstOrFail();
 

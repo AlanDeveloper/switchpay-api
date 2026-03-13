@@ -137,7 +137,7 @@ class PaymentServiceTest extends TestCase
         });
 
         $service = new PaymentService();
-        $result = $service->charge_back($transaction);
+        $result = $service->chargeBack($transaction);
 
         $this->assertTrue($result["status"]);
         $this->assertDatabaseHas("gateway_logs", [
@@ -169,7 +169,7 @@ class PaymentServiceTest extends TestCase
         });
 
         $service = new PaymentService();
-        $result = $service->charge_back($transaction);
+        $result = $service->chargeBack($transaction);
 
         $this->assertFalse($result["status"]);
         $this->assertDatabaseHas("gateway_logs", [
@@ -190,7 +190,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $service = new PaymentService();
-        $service->charge_back($transaction);
+        $service->chargeBack($transaction);
     }
 
     public function test_it_throws_exception_when_transaction_already_refunded(): void
@@ -208,7 +208,7 @@ class PaymentServiceTest extends TestCase
         $this->expectExceptionMessage("Transaction has already been refunded.");
 
         $service = new PaymentService();
-        $service->charge_back($transaction);
+        $service->chargeBack($transaction);
     }
 
     public function test_it_throws_exception_when_gateway_is_inactive(): void
@@ -226,6 +226,6 @@ class PaymentServiceTest extends TestCase
         $this->expectException(ModelNotFoundException::class);
 
         $service = new PaymentService();
-        $service->charge_back($transaction);
+        $service->chargeBack($transaction);
     }
 }

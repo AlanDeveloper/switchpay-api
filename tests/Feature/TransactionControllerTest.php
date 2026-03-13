@@ -195,7 +195,7 @@ class TransactionControllerTest extends TestCase
 
         $this->mock(PaymentService::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive("charge_back")
+                ->shouldReceive("chargeBack")
                 ->once()
                 ->andReturn([
                     "status" => true,
@@ -223,7 +223,7 @@ class TransactionControllerTest extends TestCase
 
         $this->mock(PaymentService::class, function (MockInterface $mock) {
             $mock
-                ->shouldReceive("charge_back")
+                ->shouldReceive("chargeBack")
                 ->once()
                 ->andReturn([
                     "status" => false,
