@@ -59,7 +59,7 @@ O seeder cria automaticamente um usuário para cada role:
 ```env
 APP_NAME=Laravel
 APP_ENV=local
-APP_KEY=base64:tSzyBqFKhZBmEkdIyMRHTOqv8RpK/TBsqVPBFVxJEFE=
+APP_KEY=
 APP_DEBUG=true
 APP_URL=http://localhost:5000
 
@@ -222,6 +222,27 @@ docker exec switchpay_app php artisan test
 
 ---
 
+## Filtros e Paginação
+
+Todas as rotas de listagem suportam paginação via query params padrão do Laravel:
+
+| Param      | Descrição                        | Padrão |
+|------------|----------------------------------|--------|
+| `page`     | Número da página                 | 1      |
+| `per_page` | Quantidade de itens por página   | 15     |
+
+#### Filtros disponíveis
+
+| Rota                  | Param        | Descrição                          |
+|-----------------------|--------------|------------------------------------|
+| GET /api/transaction  | `client_id`  | Filtra transações por cliente      |
+| GET /api/user         | `name`       | Filtra usuários por nome           |
+| GET /api/user         | `email`      | Filtra usuários por e-mail         |
+| GET /api/client       | `name`       | Filtra clientes por nome           |
+| GET /api/client       | `email`      | Filtra clientes por e-mail         |
+| GET /api/gateway      | `name`       | Filtra gateways por nome           |
+| GET /api/product      | `name`       | Filtra produtos por nome           |
+
 ## Comportamento dos Gateways
 
 Os pagamentos são processados pelos gateways em ordem de prioridade. Se o primeiro falhar, o próximo é tentado automaticamente. A resposta só indica falha se **todos** os gateways falharem ou se não houver nenhum disponível.
@@ -234,5 +255,11 @@ Cada tentativa é registrada e pode ser consultada via `/api/gateway/{id}/logs`.
 
 - **Roles** gerenciadas via `spatie/laravel-permission`
 - **Produtos** possuem o campo price invés de amount e também possuem available_amount indicando a quantidade disponível
-- **Novos gateways** podem ser adicionados configurando no .env e no config/services.php na chave gateways. Após isso deve ser declarado nos Enum e adicionado via seeder após só resta a implementação do gateway em si e implementar processPayment e refundPayment
+- **Novos gateways** podem ser adicionados seguindo os passos abaixo:
+  1. Adicionar as credenciais no `.env` e em `config/services.php` na chave `gateways`
+  2. Declarar o novo gateway no Enum `App\Enums\Gateway` com sua chave e mapeamento para a classe de serviço
+  3. Criar a classe de serviço em `App\Services` implementando os métodos `processPayment` e `refundPayment`
+  4. Adicionar o gateway no banco via seeder
 - **Emails** tanto na criação de usuário quanto na recuperação de senha será enviado um email ao usuário, como não estou utilizando nenhum provider é possível ver o email em storage/logs/laravel.log o qual irá fornecer ou a senha ou o token para recuperação
+- **Paginação** gerenciada automaticamente pelo `paginate()` do Eloquent, que fornece metadados como `total`, `last_page`, `current_page` e `next_page_url` sem implementação adicional
+- **Tratamento de erros** centralizado no `bootstrap/app.php` com respostas JSON padronizadas para todas as exceções, eliminando a necessidade de blocos try/catch individuais nos controllers
