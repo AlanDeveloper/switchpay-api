@@ -28,7 +28,7 @@ class ClientController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $client = Client::findOrFail($id);
+        $client = Client::with('transactions.products')->findOrFail($id);
 
         return response()->json($client);
     }

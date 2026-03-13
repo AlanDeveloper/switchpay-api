@@ -15,4 +15,9 @@ class Client extends Model
      * @var list<string>
      */
     protected $fillable = ["name", "email"];
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
