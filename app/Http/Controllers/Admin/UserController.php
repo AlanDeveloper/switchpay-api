@@ -29,7 +29,7 @@ class UserController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $user = User::findOrFail($id);
+        $user = User::with('roles')->findOrFail($id);
 
         return response()->json($user);
     }
@@ -41,6 +41,7 @@ class UserController extends Controller
             ...$request->validated(),
             "password" => Hash::make($tempPassword),
         ]);
+        $user->assignRole($request->role);
 
         Mail::to($user->email)->send(new NewUserMail($user, $tempPassword));
 
@@ -49,7 +50,9 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, int $id): JsonResponse
     {
-        User::where("id", $id)->update($request->validated());
+        $user = User::findOrFail($id);
+        $user->update($request->validated());
+        $user->syncRoles($request->role);
 
         return response()->json(null, 204);
     }

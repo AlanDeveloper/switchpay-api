@@ -24,6 +24,7 @@ class CreateUserRequest extends FormRequest
         return [
             "name" => "required|string|max:255",
             "email" => "required|string|max:255",
+            "role" => "required|string|in:admin,manager,finance,user",
         ];
     }
 }
