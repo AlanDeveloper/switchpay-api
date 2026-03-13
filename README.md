@@ -29,29 +29,6 @@ A API estará disponível em `http://localhost:8000`.
 
 ---
 
-## Variáveis de Ambiente
-
-```env
-APP_URL=http://localhost:8000
-
-DB_CONNECTION=mysql
-DB_HOST=db
-DB_DATABASE=switchpay
-DB_USERNAME=switchpay
-DB_PASSWORD=secret
-DB_ROOT_PASSWORD=root
-
-GATEWAY1_API_URL=http://gateway_mock:3001
-GATEWAY1_API_EMAIL=dev@betalent.tech
-GATEWAY1_API_TOKEN=FEC9BB078BF338F464F96B48089EB498
-
-GATEWAY2_API_URL=http://gateway_mock:3002
-GATEWAY2_API_SECRET=3d15e8ed6131446ea7e3456728b1211f
-GATEWAY2_API_TOKEN=tk_f2198cc671b5289fa856
-```
-
----
-
 ## Usuários Padrão
 
 O seeder cria automaticamente um usuário para cada role:
@@ -194,3 +171,10 @@ Cada tentativa é registrada e pode ser consultada via `/api/gateway/{id}/logs`.
 - **Emails** tanto na criação de usuário quanto na recuperação de senha será enviado um email ao usuário, como não estou utilizando nenhum provider é possível ver o email em storage/logs/laravel.log o qual irá fornecer ou a senha ou o token para recuperação
 - **Paginação** gerenciada automaticamente pelo `paginate()` do Eloquent, que fornece metadados como `total`, `last_page`, `current_page` e `next_page_url` sem implementação adicional
 - **Tratamento de erros** centralizado no `bootstrap/app.php` com respostas JSON padronizadas para todas as exceções, eliminando a necessidade de blocos try/catch individuais nos controllers
+
+---
+
+## Problemas ?
+
+- App não inicializou: Após o up é o container pode estar instalando os pacotes ainda e é possível conferir através de `docker logs switchpay_app`
+- Docker não consegue identificar os IPs: No meu caso eu tinha alguns containers e redes docker já rodando que acabaram conflitando, precisei dar um down nos containers junto a `docker system prune` e `docker network prune`
