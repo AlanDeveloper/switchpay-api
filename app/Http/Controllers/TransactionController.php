@@ -29,9 +29,11 @@ class TransactionController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $transaction = Transaction::with(["client", "products", "gateway"])->findOrFail(
-            $id,
-        );
+        $transaction = Transaction::with([
+            "client",
+            "products",
+            "gateway",
+        ])->findOrFail($id);
 
         return response()->json($transaction);
     }
@@ -81,7 +83,7 @@ class TransactionController extends Controller
 
         return response()->json(
             $transaction->load(["client", "products"]),
-            201,
+            $result["status"] ? 201 : 502,
         );
     }
 }

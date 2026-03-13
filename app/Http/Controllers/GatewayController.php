@@ -35,7 +35,7 @@ class GatewayController extends Controller
         return response()->json(null, 204);
     }
 
-    public function get_logs(int $id): JsonResponse
+    public function get_logs(Request $request, int $id): JsonResponse
     {
         $logs = GatewayLog::where("gateway_id", $id)->paginate(
             $request->per_page ?? 15,

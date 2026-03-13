@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use Http;
+use Illuminate\Support\Facades\Log;
 
 class Gateway1Service
 {
@@ -39,7 +40,7 @@ class Gateway1Service
             ->post(
                 config("services.gateways.gateway_1.url") . "/transactions",
                 [
-                    "amount" => $data["amount"],
+                    "amount" => (int) $data["amount"],
                     "name" => $data["name"],
                     "email" => $data["email"],
                     "cardNumber" => $data["card_number"],
@@ -49,7 +50,7 @@ class Gateway1Service
 
         return [
             "id" => $response->json("id"),
-            "status" => $response->successful(),
+            "response" => $response->json(),
         ];
     }
 }

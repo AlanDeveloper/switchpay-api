@@ -22,7 +22,7 @@ class Gateway2Service
             ->post(
                 config("services.gateways.gateway_2.url") . "/transacoes",
                 [
-                    "valor" => $data["amount"],
+                    "valor" => (int) $data["amount"],
                     "nome" => $data["name"],
                     "email" => $data["email"],
                     "numeroCartao" => $data["card_number"],
@@ -32,7 +32,7 @@ class Gateway2Service
 
         return [
             "id" => $response->json("id"),
-            "status" => $response->successful(),
+            "response" => $response->json(),
         ];
     }
 }
