@@ -45,10 +45,12 @@ class AuthController extends Controller
         }
 
         $token = $request->user()->createToken("api")->plainTextToken;
+        $expiresAt = now()->addMinutes(config('sanctum.expiration'));
 
         return response()->json([
             "user" => $request->user(),
             "token" => $token,
+            "expiresAt" => $expiresAt,
         ]);
     }
 
