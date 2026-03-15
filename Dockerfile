@@ -30,6 +30,10 @@ RUN composer run-script post-autoload-dump
 RUN chmod -R 775 storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    storage/logs \
+    bootstrap/cache
+
 EXPOSE 9000
 
 COPY docker/entrypoint.sh /entrypoint.sh
