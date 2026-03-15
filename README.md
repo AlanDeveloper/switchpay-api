@@ -176,5 +176,4 @@ Cada tentativa é registrada e pode ser consultada via `/api/gateway/{id}/logs`.
 
 ## Problemas ?
 
-- App não inicializou: Após o up é o container pode estar instalando os pacotes ainda e é possível conferir através de `docker logs switchpay_app`
 - Docker não consegue identificar os IPs: No meu caso eu tinha alguns containers e redes docker já rodando que acabaram conflitando, precisei dar um down nos containers junto a `docker system prune` e `docker network prune`
